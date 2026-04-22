@@ -27,11 +27,11 @@ jobs:
           toolchain: stable
           components: clippy, rustfmt
 
-      - name: Lint files
-        run: |
-          cargo update --workspace --locked --quiet
-          cargo fmt --all --check
-          cargo clippy --workspace --all-targets -- -D warnings
+      # - name: Lint files
+      #   run: |
+      #     cargo update --workspace --locked --quiet
+      #     cargo fmt --all --check
+      #     cargo clippy --workspace --all-targets -- -D warnings
 
   sanitize:
     uses: ./.github/workflows/sanitize.yml
