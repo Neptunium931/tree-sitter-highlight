@@ -29,8 +29,9 @@ jobs:
 
       - name: Lint files
         run: |
-          make lint
-          make lint-web
+          cargo update --workspace --locked --quiet
+          cargo fmt --all --check
+          cargo clippy --workspace --all-targets -- -D warnings
 
   sanitize:
     uses: ./.github/workflows/sanitize.yml
