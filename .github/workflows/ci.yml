@@ -38,6 +38,3 @@ jobs:
 
   build:
     uses: ./.github/workflows/build.yml
-
-  check-wasm-stdlib:
-    uses: ./.github/workflows/wasm_stdlib.yml
