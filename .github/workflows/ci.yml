@@ -33,8 +33,7 @@ jobs:
       #     cargo fmt --all --check
       #     cargo clippy --workspace --all-targets -- -D warnings
 
-  # sanitize:
-  #   uses: ./.github/workflows/sanitize.yml
-
   build:
     uses: ./.github/workflows/build.yml
+  # sanitize:
+  #   uses: ./.github/workflows/sanitize.yml
