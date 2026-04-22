@@ -1,11 +1,14 @@
 name: Build & Test
 
 on:
-  workflow_call:
-    inputs:
-      run-test:
-        default: true
-        type: boolean
+  push:
+    branches:
+      - 'master'
+      - 'release-[0-9]+.[0-9]+'
+  pull_request:
+    branches:
+      - 'master'
+      - 'release-[0-9]+.[0-9]+'
 
 jobs:
   build:
