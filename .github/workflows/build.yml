@@ -42,21 +42,11 @@ jobs:
           - { platform: windows-x86     , target: i686-pc-windows-msvc          , os: windows-2025     }
           - { platform: macos-arm64     , target: aarch64-apple-darwin          , os: macos-15         }
           - { platform: macos-x64       , target: x86_64-apple-darwin           , os: macos-15-intel   }
-          - { platform: wasm32          , target: wasm32-unknown-unknown        , os: ubuntu-24.04     }
-
-          # Extra features
-          - { platform: linux-arm64     , features: wasm }
-          - { platform: linux-x64       , features: wasm , run-wasm-test: true }
-          - { platform: macos-arm64     , features: wasm , run-wasm-test: true }
-          - { platform: macos-x64       , features: wasm }
 
           # Cross-compilation
           - { platform: linux-arm       , cross: true }
           - { platform: linux-x86       , cross: true }
           - { platform: linux-powerpc64 , cross: true }
-
-          # Compile-only
-          - { platform: wasm32          , no-run: true }
 
     env:
       CARGO_TERM_COLOR: always
@@ -83,39 +73,6 @@ jobs:
           printf 'CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_RUNNER=qemu-arm -L /usr/arm-linux-gnueabihf\n'
           printf 'CARGO_TARGET_POWERPC64_UNKNOWN_LINUX_GNU_RUNNER=qemu-ppc64 -L /usr/powerpc64-linux-gnu\n'
         } >> $GITHUB_ENV
-
-    - name: Get emscripten version
-      if: contains(matrix.features, 'wasm') && (matrix.run-wasm-test || !inputs.run-test)
-      run: printf 'EMSCRIPTEN_VERSION=%s\n' "$(<crates/loader/emscripten-version)" >> $GITHUB_ENV
-
-    - name: Cache Emscripten SDK
-      if: contains(matrix.features, 'wasm') && (matrix.run-wasm-test || !inputs.run-test)
-      uses: actions/cache@v5
-      with:
-        path: emsdk
-        key: emsdk-${{ env.EMSCRIPTEN_VERSION }}-${{ runner.os }}-${{ runner.arch }}
-
-    - name: Install Emscripten
-      if: contains(matrix.features, 'wasm') && (matrix.run-wasm-test || !inputs.run-test)
-      run: |
-        if [[ ! -d emsdk ]]; then
-          git clone --depth 1 https://github.com/emscripten-core/emsdk.git
-        fi
-        cd emsdk
-        ./emsdk install ${{ env.EMSCRIPTEN_VERSION }}
-        ./emsdk activate ${{ env.EMSCRIPTEN_VERSION }}
-        echo "$PWD" >> "$GITHUB_PATH"
-        echo "$PWD/upstream/emscripten" >> "$GITHUB_PATH"
-        echo "EMSDK=$PWD" >> "$GITHUB_ENV"
-        echo "EMSDK_NODE=$PWD/node/$(ls node)/bin/node" >> "$GITHUB_ENV"
-
-    - name: Set up Node.js
-      if: contains(matrix.features, 'wasm') && (matrix.run-wasm-test || !inputs.run-test)
-      uses: actions/setup-node@v6
-      with:
-        node-version: 24
-        cache: npm
-        cache-dependency-path: lib/binding_web/package-lock.json
 
     - name: Set up Rust
       uses: actions-rust-lang/setup-rust-toolchain@v1
