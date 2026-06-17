@@ -84,7 +84,7 @@ jobs:
 
       - name: Set up registry token
         id: auth
-        uses: rust-lang/crates-io-auth-action@v1
+        uses: rust-lang/crates-io-auth-action@v1.0.4
 
       - name: Publish crates to Crates.io
         uses: katyo/publish-crates@v2
