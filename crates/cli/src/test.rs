@@ -22,12 +22,7 @@ use tree_sitter::{Language, LogType, Parser, Query, Tree, format_sexp};
 use walkdir::WalkDir;
 
 use super::util;
-use crate::{
-    logger::paint,
-    parse::{
-        ParseDebugType, ParseFileOptions, ParseOutput, ParseStats, ParseTheme, Stats, render_cst,
-    },
-};
+use crate::logger::paint;
 
 /// Check if a line consists of 3+ repetitions of `ch` followed by an optional suffix.
 ///
@@ -182,7 +177,6 @@ pub struct TestSummary {
     #[serde(serialize_with = "serialize_as_array")]
     pub parse_results: TestResultHierarchy,
     pub parse_failures: Vec<TestFailure>,
-    pub parse_stats: Stats,
     #[schemars(skip)]
     #[serde(skip)]
     pub has_parse_errors: bool,
@@ -646,9 +640,6 @@ impl std::fmt::Display for TestSummary {
         if !self.query_results.root_group.is_empty() {
             render_assertion_results("queries", &self.query_results)?;
         }
-
-        write!(f, "{}", self.parse_stats)?;
-
         Ok(())
     }
 }
@@ -928,10 +919,6 @@ fn run_tests(
                         byte_len as f64 / (parse_time.as_nanos() as f64 / 1_000_000.0);
                     let adj_parse_rate = adjusted_parse_rate(&tree, parse_time);
 
-                    test_summary.parse_stats.total_parses += 1;
-                    test_summary.parse_stats.total_duration += parse_time;
-                    test_summary.parse_stats.total_bytes += byte_len;
-
                     Some((true_parse_rate, adj_parse_rate))
                 };
 
@@ -945,7 +932,6 @@ fn run_tests(
                                 test_num: test_summary.test_num,
                             },
                         });
-                        test_summary.parse_stats.successful_parses += 1;
                         if opts.update {
                             let input = String::from_utf8(input.clone()).unwrap();
                             let output = if attributes.cst {
@@ -988,11 +974,7 @@ fn run_tests(
                                 test_num: test_summary.test_num,
                             },
                         });
-                        let actual = if attributes.cst {
-                            render_test_cst(&input, &tree)?
-                        } else {
-                            tree.root_node().to_sexp()
-                        };
+                        let actual = tree.root_node().to_sexp();
                         test_summary.parse_failures.push(TestFailure::new(
                             &name,
                             actual,
@@ -1005,11 +987,7 @@ fn run_tests(
                         return Ok(false);
                     }
                 } else {
-                    let mut actual = if attributes.cst {
-                        render_test_cst(&input, &tree)?
-                    } else {
-                        tree.root_node().to_sexp()
-                    };
+                    let mut actual = tree.root_node().to_sexp();
                     if !(attributes.cst || opts.show_fields || has_fields) {
                         actual = strip_sexp_fields(&actual);
                     }
@@ -1023,7 +1001,6 @@ fn run_tests(
                                 test_num: test_summary.test_num,
                             },
                         });
-                        test_summary.parse_stats.successful_parses += 1;
                         if opts.update {
                             let input = String::from_utf8(input.clone()).unwrap();
                             let output = if attributes.cst {
@@ -1191,28 +1168,6 @@ fn run_tests(
         }
     }
     Ok(true)
-}
-
-/// Convenience wrapper to render a CST for a test entry.
-fn render_test_cst(input: &[u8], tree: &Tree) -> Result<String> {
-    let mut rendered_cst: Vec<u8> = Vec::new();
-    let mut cursor = tree.walk();
-    let opts = ParseFileOptions {
-        edits: &[],
-        output: ParseOutput::Cst,
-        stats: &mut ParseStats::default(),
-        print_time: false,
-        timeout: 0,
-        debug: ParseDebugType::Quiet,
-        debug_graph: false,
-        cancellation_flag: None,
-        encoding: None,
-        open_log: false,
-        no_ranges: false,
-        parse_theme: &ParseTheme::empty(),
-    };
-    render_cst(input, tree, &mut cursor, &opts, &mut rendered_cst)?;
-    Ok(String::from_utf8_lossy(&rendered_cst).trim().to_string())
 }
 
 // Parse time is interpreted in ns before converting to ms to avoid truncation issues
@@ -2371,7 +2326,6 @@ Test with cst marker
         // parse rates will always be different, so we need to clear out these
         // fields to reliably assert equality below
         clear_parse_rate(&mut test_summary.parse_results.root_group[0]);
-        test_summary.parse_stats.total_duration = Duration::from_secs(0);
 
         let json_results = serde_json::to_string(&test_summary).unwrap();
 
@@ -2518,7 +2472,6 @@ Test with cst marker
                     panic!("Unexpected test result");
                 }
             }
-            test_summary.parse_stats.total_duration = Duration::from_secs(0);
         }
 
         let json_results = serde_json::to_string(&test_summary).unwrap();

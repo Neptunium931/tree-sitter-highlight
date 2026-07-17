@@ -3,7 +3,10 @@
 
 #[cfg(unix)]
 use std::fmt::Write as _;
-#[cfg(any(feature = "tree-sitter-highlight-extended", feature = "tree-sitter-tags"))]
+#[cfg(any(
+    feature = "tree-sitter-highlight-extended",
+    feature = "tree-sitter-tags"
+))]
 use std::ops::Range;
 use std::{
     collections::HashMap,
@@ -27,7 +30,10 @@ use semver::Version;
 use serde::{Deserialize, Deserializer, Serialize};
 use thiserror::Error;
 use tree_sitter::Language;
-#[cfg(any(feature = "tree-sitter-highlight-extended", feature = "tree-sitter-tags"))]
+#[cfg(any(
+    feature = "tree-sitter-highlight-extended",
+    feature = "tree-sitter-tags"
+))]
 use tree_sitter::QueryError;
 #[cfg(feature = "tree-sitter-highlight-extended")]
 use tree_sitter::QueryErrorKind;
@@ -2200,7 +2206,10 @@ impl LanguageConfiguration<'_> {
             .map(Option::as_ref)
     }
 
-    #[cfg(any(feature = "tree-sitter-highlight-extended", feature = "tree-sitter-tags"))]
+    #[cfg(any(
+        feature = "tree-sitter-highlight-extended",
+        feature = "tree-sitter-tags"
+    ))]
     fn include_path_in_query_error(
         mut error: QueryError,
         ranges: &[(PathBuf, Range<usize>)],
@@ -2226,7 +2235,10 @@ impl LanguageConfiguration<'_> {
         clippy::type_complexity,
         reason = "return type pairs query text with source file ranges"
     )]
-    #[cfg(any(feature = "tree-sitter-highlight-extended", feature = "tree-sitter-tags"))]
+    #[cfg(any(
+        feature = "tree-sitter-highlight-extended",
+        feature = "tree-sitter-tags"
+    ))]
     fn read_queries(
         &self,
         paths: Option<&[PathBuf]>,
