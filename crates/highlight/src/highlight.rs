@@ -1318,7 +1318,6 @@ impl HtmlRenderer {
     }
 }
 
-
 impl Default for LatexRenderer {
     fn default() -> Self {
         Self::new()

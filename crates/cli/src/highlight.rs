@@ -17,7 +17,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer, ser::SerializeMap}
 use serde_json::{Value, json};
 use tree_sitter::ffi::{self, TSInputEncoding};
 use tree_sitter_highlight_extended::{
-    HighlightConfiguration, HighlightEvent, Highlighter, HtmlRenderer, LatexRenderer
+    HighlightConfiguration, HighlightEvent, Highlighter, HtmlRenderer, LatexRenderer,
 };
 
 use tree_sitter_loader::Loader;
@@ -54,17 +54,15 @@ pub const HTML_FOOTER: &str = "
 pub struct Style {
     pub ansi: anstyle::Style,
     pub css: Option<String>,
-    pub latex:  Option<LatexStyle>
+    pub latex: Option<LatexStyle>,
 }
 
-
 #[derive(Debug, Default)]
-pub struct LatexStyle
-{
+pub struct LatexStyle {
     pub underline: bool,
     pub bold: bool,
     pub italic: bool,
-    pub rgb: [f32; 3]
+    pub rgb: [f32; 3],
 }
 
 #[derive(Debug)]
@@ -283,7 +281,11 @@ fn hex_string_to_rgb(s: &str) -> Option<(u8, u8, u8)> {
 
 fn rgb_to_latex(rgb: (u8, u8, u8)) -> [f32; 3] {
     let (red, green, blue) = rgb;
-    [red as f32 / 255.0, green as f32 / 255.0, blue as f32 / 255.0]
+    [
+        red as f32 / 255.0,
+        green as f32 / 255.0,
+        blue as f32 / 255.0,
+    ]
 }
 
 fn style_to_css(style: anstyle::Style) -> String {
