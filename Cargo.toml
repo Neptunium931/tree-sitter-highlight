@@ -2,12 +2,8 @@
 default-members = [ "crates/cli" ]
 members = [
   "crates/cli",
-  "crates/config",
-  "crates/generate",
   "crates/highlight",
   "crates/loader",
-  "crates/tags",
-  "crates/highlight",
 ]
 resolver = "2"
 
