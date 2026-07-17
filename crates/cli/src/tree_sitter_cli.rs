@@ -6,11 +6,4 @@ pub mod logger;
 pub mod query_testing;
 pub mod test;
 pub mod test_highlight;
-pub mod test_tags;
 pub mod util;
-
-#[cfg(test)]
-mod tests;
-
-#[cfg(doctest)]
-mod tests;

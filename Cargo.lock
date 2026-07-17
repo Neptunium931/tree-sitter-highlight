@@ -1486,7 +1486,6 @@ dependencies = [
  "tree-sitter-highlight-extended",
  "tree-sitter-loader",
  "tree-sitter-tags",
- "tree-sitter-tests-proc-macro",
  "unindent",
  "walkdir",
  "wasmparser 0.244.0",
@@ -1570,15 +1569,6 @@ dependencies = [
  "streaming-iterator",
  "thiserror",
  "tree-sitter",
-]
-
-[[package]]
-name = "tree-sitter-tests-proc-macro"
-version = "0.0.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]
