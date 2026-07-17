@@ -22,12 +22,7 @@ use tree_sitter::{Language, LogType, Parser, Query, Tree, format_sexp};
 use walkdir::WalkDir;
 
 use super::util;
-use crate::{
-    logger::paint,
-    parse::{
-        ParseDebugType, ParseFileOptions, ParseOutput, ParseStats, ParseTheme, Stats, render_cst,
-    },
-};
+use crate::logger::paint;
 
 /// Check if a line consists of 3+ repetitions of `ch` followed by an optional suffix.
 ///
@@ -182,7 +177,6 @@ pub struct TestSummary {
     #[serde(serialize_with = "serialize_as_array")]
     pub parse_results: TestResultHierarchy,
     pub parse_failures: Vec<TestFailure>,
-    pub parse_stats: Stats,
     #[schemars(skip)]
     #[serde(skip)]
     pub has_parse_errors: bool,
@@ -646,9 +640,6 @@ impl std::fmt::Display for TestSummary {
         if !self.query_results.root_group.is_empty() {
             render_assertion_results("queries", &self.query_results)?;
         }
-
-        write!(f, "{}", self.parse_stats)?;
-
         Ok(())
     }
 }
@@ -928,10 +919,6 @@ fn run_tests(
                         byte_len as f64 / (parse_time.as_nanos() as f64 / 1_000_000.0);
                     let adj_parse_rate = adjusted_parse_rate(&tree, parse_time);
 
-                    test_summary.parse_stats.total_parses += 1;
-                    test_summary.parse_stats.total_duration += parse_time;
-                    test_summary.parse_stats.total_bytes += byte_len;
-
                     Some((true_parse_rate, adj_parse_rate))
                 };
 
@@ -945,7 +932,6 @@ fn run_tests(
                                 test_num: test_summary.test_num,
                             },
                         });
-                        test_summary.parse_stats.successful_parses += 1;
                         if opts.update {
                             let input = String::from_utf8(input.clone()).unwrap();
                             let output = if attributes.cst {
@@ -988,11 +974,7 @@ fn run_tests(
                                 test_num: test_summary.test_num,
                             },
                         });
-                        let actual = if attributes.cst {
-                            render_test_cst(&input, &tree)?
-                        } else {
-                            tree.root_node().to_sexp()
-                        };
+                        let actual = tree.root_node().to_sexp();
                         test_summary.parse_failures.push(TestFailure::new(
                             &name,
                             actual,
@@ -1005,11 +987,7 @@ fn run_tests(
                         return Ok(false);
                     }
                 } else {
-                    let mut actual = if attributes.cst {
-                        render_test_cst(&input, &tree)?
-                    } else {
-                        tree.root_node().to_sexp()
-                    };
+                    let mut actual = tree.root_node().to_sexp();
                     if !(attributes.cst || opts.show_fields || has_fields) {
                         actual = strip_sexp_fields(&actual);
                     }
@@ -1023,7 +1001,6 @@ fn run_tests(
                                 test_num: test_summary.test_num,
                             },
                         });
-                        test_summary.parse_stats.successful_parses += 1;
                         if opts.update {
                             let input = String::from_utf8(input.clone()).unwrap();
                             let output = if attributes.cst {
@@ -1191,28 +1168,6 @@ fn run_tests(
         }
     }
     Ok(true)
-}
-
-/// Convenience wrapper to render a CST for a test entry.
-fn render_test_cst(input: &[u8], tree: &Tree) -> Result<String> {
-    let mut rendered_cst: Vec<u8> = Vec::new();
-    let mut cursor = tree.walk();
-    let opts = ParseFileOptions {
-        edits: &[],
-        output: ParseOutput::Cst,
-        stats: &mut ParseStats::default(),
-        print_time: false,
-        timeout: 0,
-        debug: ParseDebugType::Quiet,
-        debug_graph: false,
-        cancellation_flag: None,
-        encoding: None,
-        open_log: false,
-        no_ranges: false,
-        parse_theme: &ParseTheme::empty(),
-    };
-    render_cst(input, tree, &mut cursor, &opts, &mut rendered_cst)?;
-    Ok(String::from_utf8_lossy(&rendered_cst).trim().to_string())
 }
 
 // Parse time is interpreted in ns before converting to ms to avoid truncation issues
@@ -1636,10 +1591,6 @@ fn build_test_entry(
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
-
-    use crate::tests::get_language;
-
     use super::*;
 
     #[test]
@@ -2291,293 +2242,6 @@ Test with cst marker
                     }
                 ]
             }
-        );
-    }
-
-    fn clear_parse_rate(result: &mut TestResult) {
-        let test_case_info = &mut result.info;
-        match test_case_info {
-            TestInfo::ParseTest { parse_rate, .. } => {
-                assert!(parse_rate.is_some());
-                *parse_rate = None;
-            }
-            TestInfo::Group { .. } | TestInfo::AssertionTest { .. } => {
-                panic!("Unexpected test result")
-            }
-        }
-    }
-
-    fn c_parser_and_language() -> (Parser, Language) {
-        let mut parser = Parser::new();
-        let language = get_language("c");
-        parser
-            .set_language(&language)
-            .expect("Failed to set language");
-        (parser, language)
-    }
-
-    fn c_test_options(language: &Language) -> TestOptions<'_> {
-        let mut languages = BTreeMap::new();
-        languages.insert("c", language);
-        TestOptions {
-            path: PathBuf::from("foo"),
-            debug: true,
-            debug_graph: false,
-            include: None,
-            exclude: None,
-            file_name: None,
-            update: false,
-            open_log: false,
-            languages,
-            color: true,
-            show_fields: false,
-            overview_only: false,
-        }
-    }
-
-    #[test]
-    fn run_tests_single_passing() {
-        let (mut parser, language) = c_parser_and_language();
-        let opts = c_test_options(&language);
-
-        let test_entry = TestEntry::Group {
-            name: "foo".to_string(),
-            file_path: None,
-            children: vec![TestEntry::Example {
-                name: "C Test 1".to_string(),
-                input: b"1;\n".to_vec(),
-                output: "(translation_unit (expression_statement (number_literal)))".to_string(),
-                header_delim_len: 25,
-                divider_delim_len: 3,
-                has_fields: false,
-                attributes_str: String::new(),
-                attributes: TestAttributes::default(),
-                file_name: None,
-            }],
-        };
-
-        let mut test_summary = TestSummary::new(true, TestStats::All, false, false, false);
-        let mut corrected_entries = Vec::new();
-        run_tests(
-            &mut parser,
-            test_entry,
-            &opts,
-            &mut test_summary,
-            &mut corrected_entries,
-            true,
-        )
-        .expect("Failed to run tests");
-
-        // parse rates will always be different, so we need to clear out these
-        // fields to reliably assert equality below
-        clear_parse_rate(&mut test_summary.parse_results.root_group[0]);
-        test_summary.parse_stats.total_duration = Duration::from_secs(0);
-
-        let json_results = serde_json::to_string(&test_summary).unwrap();
-
-        assert_eq!(
-            json_results,
-            json!({
-              "parse_results": [
-                {
-                  "name": "C Test 1",
-                  "outcome": "Passed",
-                  "parse_rate": null,
-                  "test_num": 1
-                }
-              ],
-              "parse_failures": [],
-              "parse_stats": {
-                "successful_parses": 1,
-                "total_parses": 1,
-                "total_bytes": 3,
-                "total_duration": {
-                  "secs": 0,
-                  "nanos": 0,
-                }
-              },
-              "highlight_results": [],
-              "tag_results": [],
-              "query_results": []
-            })
-            .to_string()
-        );
-    }
-
-    #[test]
-    fn run_tests_fail_fast() {
-        let (mut parser, language) = c_parser_and_language();
-        let opts = c_test_options(&language);
-
-        let test_entry = TestEntry::Group {
-            name: "corpus".to_string(),
-            file_path: None,
-            children: vec![
-                TestEntry::Group {
-                    name: "group1".to_string(),
-                    // This test passes
-                    children: vec![TestEntry::Example {
-                        name: "C Test 1".to_string(),
-                        input: b"1;\n".to_vec(),
-                        output: "(translation_unit (expression_statement (number_literal)))"
-                            .to_string(),
-                        header_delim_len: 25,
-                        divider_delim_len: 3,
-                        has_fields: false,
-                        attributes_str: String::new(),
-                        attributes: TestAttributes::default(),
-                        file_name: None,
-                    }],
-                    file_path: None,
-                },
-                TestEntry::Group {
-                    name: "group2".to_string(),
-                    children: vec![
-                        // This test passes
-                        TestEntry::Example {
-                            name: "C Test 2".to_string(),
-                            input: b"1;\n".to_vec(),
-                            output: "(translation_unit (expression_statement (number_literal)))"
-                                .to_string(),
-                            header_delim_len: 25,
-                            divider_delim_len: 3,
-                            has_fields: false,
-                            attributes_str: String::new(),
-                            attributes: TestAttributes::default(),
-                            file_name: None,
-                        },
-                        // This test fails, and is marked with fail-fast
-                        TestEntry::Example {
-                            name: "C Test 3".to_string(),
-                            input: b"1;\n".to_vec(),
-                            output: "(translation_unit (expression_statement (string_literal)))"
-                                .to_string(),
-                            header_delim_len: 25,
-                            divider_delim_len: 3,
-                            has_fields: false,
-                            attributes_str: String::new(),
-                            attributes: TestAttributes {
-                                fail_fast: true,
-                                ..Default::default()
-                            },
-                            file_name: None,
-                        },
-                    ],
-                    file_path: None,
-                },
-                // This group never runs because of the previous failure
-                TestEntry::Group {
-                    name: "group3".to_string(),
-                    // This test fails, and is marked with fail-fast
-                    children: vec![TestEntry::Example {
-                        name: "C Test 4".to_string(),
-                        input: b"1;\n".to_vec(),
-                        output: "(translation_unit (expression_statement (number_literal)))"
-                            .to_string(),
-                        header_delim_len: 25,
-                        divider_delim_len: 3,
-                        has_fields: false,
-                        attributes_str: String::new(),
-                        attributes: TestAttributes::default(),
-                        file_name: None,
-                    }],
-                    file_path: None,
-                },
-            ],
-        };
-
-        let mut test_summary = TestSummary::new(true, TestStats::All, false, false, false);
-        let mut corrected_entries = Vec::new();
-        run_tests(
-            &mut parser,
-            test_entry,
-            &opts,
-            &mut test_summary,
-            &mut corrected_entries,
-            true,
-        )
-        .expect("Failed to run tests");
-
-        // parse rates will always be different, so we need to clear out these
-        // fields to reliably assert equality below
-        {
-            let test_group_1_info = &mut test_summary.parse_results.root_group[0].info;
-            match test_group_1_info {
-                TestInfo::Group { children, .. } => clear_parse_rate(&mut children[0]),
-                TestInfo::ParseTest { .. } | TestInfo::AssertionTest { .. } => {
-                    panic!("Unexpected test result");
-                }
-            }
-            let test_group_2_info = &mut test_summary.parse_results.root_group[1].info;
-            match test_group_2_info {
-                TestInfo::Group { children, .. } => {
-                    clear_parse_rate(&mut children[0]);
-                    clear_parse_rate(&mut children[1]);
-                }
-                TestInfo::ParseTest { .. } | TestInfo::AssertionTest { .. } => {
-                    panic!("Unexpected test result");
-                }
-            }
-            test_summary.parse_stats.total_duration = Duration::from_secs(0);
-        }
-
-        let json_results = serde_json::to_string(&test_summary).unwrap();
-
-        assert_eq!(
-            json_results,
-            json!({
-              "parse_results": [
-                {
-                  "name": "group1",
-                  "children": [
-                    {
-                      "name": "C Test 1",
-                      "outcome": "Passed",
-                      "parse_rate": null,
-                      "test_num": 1
-                    }
-                  ]
-                },
-                {
-                  "name": "group2",
-                  "children": [
-                    {
-                      "name": "C Test 2",
-                      "outcome": "Passed",
-                      "parse_rate": null,
-                      "test_num": 2
-                    },
-                    {
-                      "name": "C Test 3",
-                      "outcome": "Failed",
-                      "parse_rate": null,
-                      "test_num": 3
-                    }
-                  ]
-                }
-              ],
-              "parse_failures": [
-                {
-                  "name": "C Test 3",
-                  "actual": "(translation_unit (expression_statement (number_literal)))",
-                  "expected": "(translation_unit (expression_statement (string_literal)))",
-                  "is_cst": false,
-                }
-              ],
-              "parse_stats": {
-                "successful_parses": 2,
-                "total_parses": 3,
-                "total_bytes": 9,
-                "total_duration": {
-                  "secs": 0,
-                  "nanos": 0,
-                }
-              },
-              "highlight_results": [],
-              "tag_results": [],
-              "query_results": []
-            })
-            .to_string()
         );
     }
 }
