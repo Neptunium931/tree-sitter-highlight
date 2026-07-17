@@ -1,5 +1,5 @@
 use tree_sitter::Parser;
-use tree_sitter_highlight::{Highlight, Highlighter};
+use tree_sitter_highlight_extended::{Highlight, Highlighter};
 
 use super::helpers::fixtures::{get_highlight_config, get_language, test_loader};
 use crate::{

@@ -9,7 +9,7 @@ use std::{
     },
 };
 
-use tree_sitter_highlight::{
+use tree_sitter_highlight_extended::{
     Error, Highlight, HighlightConfiguration, HighlightEvent, Highlighter, HtmlRenderer, c,
 };
 

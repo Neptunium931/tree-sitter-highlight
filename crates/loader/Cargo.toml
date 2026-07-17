@@ -24,7 +24,7 @@ path = "src/loader.rs"
 workspace = true
 
 [features]
-default = [ "tree-sitter-highlight", "tree-sitter-tags" ]
+default = [ "tree-sitter-highlight-extended", "tree-sitter-tags" ]
 wasm    = [ "tree-sitter/wasm" ]
 
 [dependencies]
@@ -40,6 +40,6 @@ serde_json.workspace = true
 tempfile.workspace   = true
 thiserror.workspace  = true
 
-tree-sitter           = { workspace = true }
-tree-sitter-highlight = { optional = true, workspace = true }
-tree-sitter-tags      = { optional = true, workspace = true }
+tree-sitter                    = { workspace = true }
+tree-sitter-highlight-extended = { optional = true, workspace = true }
+tree-sitter-tags               = { optional = true, workspace = true }

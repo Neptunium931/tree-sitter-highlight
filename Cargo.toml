@@ -7,11 +7,7 @@ members = [
   "crates/highlight",
   "crates/loader",
   "crates/tags",
-  "crates/xtask",
-  "crates/language",
-  "lib",
   "crates/highlight",
-  "crates/xtask"
 ]
 resolver = "2"
 
@@ -128,30 +124,17 @@ walkdir = "2.5.0"
 wasmparser = "0.244.0"
 webbrowser = "1.1.0"
 
-<<<<<<< HEAD
-tree-sitter           = { path = "./lib", version = "0.27.0" }
-tree-sitter-config    = { path = "./crates/config", version = "0.27.0" }
-tree-sitter-generate  = { path = "./crates/generate", version = "0.27.0", default-features = false }
-tree-sitter-highlight = { path = "./crates/highlight", version = "0.27.0" }
+tree-sitter           = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0" }
+tree-sitter-config    = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0" }
+tree-sitter-generate  = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0", default-features = false }
+# tree-sitter-loader    = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0" }
+tree-sitter-tags      = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0" }
+# tree-sitter-language  = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.1" }
+
+# tree-sitter           = { path = "./lib", version = "0.27.0" }
+# tree-sitter-config    = { path = "./crates/config", version = "0.27.0" }
+# tree-sitter-generate  = { path = "./crates/generate", version = "0.27.0", default-features = false }
 tree-sitter-loader    = { path = "./crates/loader", version = "0.27.0" }
-tree-sitter-tags      = { path = "./crates/tags", version = "0.27.0" }
-tree-sitter-language  = { path = "./crates/language", version = "0.1" }
-||||||| parent of 64d2dd8d (remove unused dependencies)
-tree-sitter           = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0" }
-tree-sitter-config    = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0" }
-tree-sitter-generate  = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0", default-features = false }
-tree-sitter-loader    = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0" }
-tree-sitter-tags      = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0" }
-tree-sitter-language  = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.1" }
-tree-sitter-highlight = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0" }
-
+# tree-sitter-tags      = { path = "./crates/tags", version = "0.27.0" }
+# tree-sitter-language  = { path = "./crates/language", version = "0.1" }
 tree-sitter-highlight-extended = { path = "./crates/highlight", version = "0.27.0" }
-=======
-tree-sitter           = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0" }
-tree-sitter-config    = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0" }
-tree-sitter-generate  = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0", default-features = false }
-tree-sitter-loader    = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0" }
-tree-sitter-tags      = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0" }
-
-tree-sitter-highlight-extended = { path = "./crates/highlight", version = "0.27.0" }
->>>>>>> 64d2dd8d (remove unused dependencies)

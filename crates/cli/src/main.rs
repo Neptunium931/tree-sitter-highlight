@@ -15,10 +15,7 @@ use regex::Regex;
 use semver::Version as SemverVersion;
 use tree_sitter::{Parser, Point, ffi};
 use tree_sitter_cli::{
-    fuzz::{
-        DEFAULT_EDIT_COUNT, DEFAULT_ITERATION_COUNT, EDIT_COUNT, FuzzOptions, ITERATION_COUNT,
-        LOG_ENABLED, LOG_GRAPH_ENABLED, START_SEED, fuzz_language_corpus,
-    },
+    fuzz::{DEFAULT_EDIT_COUNT, DEFAULT_ITERATION_COUNT},
     highlight::{self, HighlightOptions},
     init::{JsonConfigOpts, TREE_SITTER_JSON_SCHEMA, generate_grammar_files},
     input::{CliInput, get_input, get_tmp_source_file},
@@ -34,7 +31,7 @@ use tree_sitter_cli::{
 };
 use tree_sitter_config::Config;
 use tree_sitter_generate::OptLevel;
-use tree_sitter_highlight::Highlighter;
+use tree_sitter_highlight_extended::Highlighter;
 use tree_sitter_loader::{self as loader, Bindings, TreeSitterJSON};
 use tree_sitter_tags::TagsContext;
 
@@ -144,24 +141,12 @@ struct Generate {
     )]
     pub json_summary: bool,
     /// The name or path of the JavaScript runtime to use for generating parsers
-    #[cfg(not(feature = "qjs-rt"))]
     #[arg(
         long,
         value_name = "EXECUTABLE",
         env = "TREE_SITTER_JS_RUNTIME",
         default_value = "node"
     )]
-    pub js_runtime: Option<String>,
-
-    #[cfg(feature = "qjs-rt")]
-    #[arg(
-        long,
-        value_name = "EXECUTABLE",
-        env = "TREE_SITTER_JS_RUNTIME",
-        default_value = "node"
-    )]
-    /// The name or path of the JavaScript runtime to use for generating parsers, specify `native`
-    /// to use the native `QuickJS` runtime
     pub js_runtime: Option<String>,
 
     /// Disable optimizations when generating the parser. Currently, this only affects
@@ -228,9 +213,6 @@ struct Parse {
     /// Produce the log.html file with debug graphs
     #[arg(long, short = 'D')]
     pub debug_graph: bool,
-    /// Compile parsers to Wasm instead of native dynamic libraries
-    #[arg(long, hide = cfg!(not(feature = "wasm")))]
-    pub wasm: bool,
     /// Output the parse data with graphviz dot
     #[arg(long = "dot")]
     pub output_dot: bool,
@@ -331,9 +313,6 @@ struct Test {
     /// Produce the log.html file with debug graphs
     #[arg(long, short = 'D')]
     pub debug_graph: bool,
-    /// Compile parsers to Wasm instead of native dynamic libraries
-    #[arg(long, hide = cfg!(not(feature = "wasm")))]
-    pub wasm: bool,
     /// Open `log.html` in the default browser, if `--debug-graph` is supplied
     #[arg(long)]
     pub open_log: bool,
@@ -619,20 +598,6 @@ pub enum Shell {
     PowerShell,
     Zsh,
     Nushell,
-}
-
-/// Complete `action` if the wasm feature is enabled, otherwise return an error
-macro_rules! checked_wasm {
-    ($action:block) => {
-        #[cfg(feature = "wasm")]
-        {
-            $action
-        }
-        #[cfg(not(feature = "wasm"))]
-        {
-            Err(anyhow!("--wasm flag specified, but this build of tree-sitter-cli does not include the wasm feature"))?;
-        }
-    };
 }
 
 impl InitConfig {
@@ -948,6 +913,7 @@ impl Generate {
             self.json_summary
         };
 
+        let mut diagnostics = Vec::new();
         if let Err(err) = tree_sitter_generate::generate_parser_in_directory(
             current_dir,
             self.output.as_deref(),
@@ -961,6 +927,7 @@ impl Generate {
             } else {
                 OptLevel::default()
             },
+            &mut diagnostics,
         ) {
             if json_summary {
                 eprintln!("{}", serde_json::to_string_pretty(&err)?);
@@ -1087,16 +1054,6 @@ impl Parse {
 
         loader.debug_build(self.debug_build);
         loader.force_rebuild(self.rebuild || self.grammar_path.is_some());
-
-        if self.wasm {
-            checked_wasm!({
-                let engine = tree_sitter::wasmtime::Engine::default();
-                parser
-                    .set_wasm_store(tree_sitter::WasmStore::new(&engine).unwrap())
-                    .unwrap();
-                loader.use_wasm(&engine);
-            });
-        }
 
         let timeout = self.timeout.unwrap_or_default();
 
@@ -1308,16 +1265,6 @@ impl Test {
 
         let mut parser = Parser::new();
 
-        if self.wasm {
-            checked_wasm!({
-                let engine = tree_sitter::wasmtime::Engine::default();
-                parser
-                    .set_wasm_store(tree_sitter::WasmStore::new(&engine).unwrap())
-                    .unwrap();
-                loader.use_wasm(&engine);
-            });
-        }
-
         if self.lib_path.is_none() && self.lang_name.is_some() {
             warn!("--lang-name specified without --lib-path. This argument will be ignored.");
         }
@@ -1501,7 +1448,7 @@ impl Fuzz {
             warn!("--lang-name specified without --lib-path. This argument will be ignored.");
         }
         let languages = loader.languages_at_path(current_dir)?;
-        let (language, language_name) = if let Some(ref lib_path) = self.lib_path {
+        if let Some(ref lib_path) = self.lib_path {
             let lib_info = get_lib_info(Some(lib_path), self.lang_name.as_ref(), current_dir)
                 .with_context(|| anyhow!("No language name found for {}", lib_path.display()))?;
             let lang_name = lib_info.1.to_string();
@@ -1522,24 +1469,6 @@ impl Fuzz {
                 .ok_or_else(|| anyhow!("No language found"))?
         };
 
-        let mut fuzz_options = FuzzOptions {
-            skipped: self.skip,
-            subdir: self.subdir,
-            edits: self.edits.unwrap_or(*EDIT_COUNT),
-            iterations: self.iterations.unwrap_or(*ITERATION_COUNT),
-            include: self.include,
-            exclude: self.exclude,
-            log_graphs: self.log_graphs || *LOG_GRAPH_ENABLED,
-            log: self.log || *LOG_ENABLED,
-        };
-
-        fuzz_language_corpus(
-            language,
-            language_name,
-            *START_SEED,
-            current_dir,
-            &mut fuzz_options,
-        );
         Ok(())
     }
 }

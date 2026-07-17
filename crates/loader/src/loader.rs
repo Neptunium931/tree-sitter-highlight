@@ -3,7 +3,7 @@
 
 #[cfg(unix)]
 use std::fmt::Write as _;
-#[cfg(any(feature = "tree-sitter-highlight", feature = "tree-sitter-tags"))]
+#[cfg(any(feature = "tree-sitter-highlight-extended", feature = "tree-sitter-tags"))]
 use std::ops::Range;
 use std::{
     collections::HashMap,
@@ -27,14 +27,14 @@ use semver::Version;
 use serde::{Deserialize, Deserializer, Serialize};
 use thiserror::Error;
 use tree_sitter::Language;
-#[cfg(any(feature = "tree-sitter-highlight", feature = "tree-sitter-tags"))]
+#[cfg(any(feature = "tree-sitter-highlight-extended", feature = "tree-sitter-tags"))]
 use tree_sitter::QueryError;
-#[cfg(feature = "tree-sitter-highlight")]
+#[cfg(feature = "tree-sitter-highlight-extended")]
 use tree_sitter::QueryErrorKind;
 #[cfg(feature = "wasm")]
 use tree_sitter::WasmError;
-#[cfg(feature = "tree-sitter-highlight")]
-use tree_sitter_highlight::HighlightConfiguration;
+#[cfg(feature = "tree-sitter-highlight-extended")]
+use tree_sitter_highlight_extended::HighlightConfiguration;
 #[cfg(feature = "tree-sitter-tags")]
 use tree_sitter_tags::{Error as TagsError, TagsConfiguration};
 
@@ -647,13 +647,13 @@ pub struct LanguageConfiguration<'a> {
     pub tags_filenames: Option<Vec<PathBuf>>,
     pub language_name: String,
     language_id: usize,
-    #[cfg(feature = "tree-sitter-highlight")]
+    #[cfg(feature = "tree-sitter-highlight-extended")]
     highlight_config: OnceCell<Option<HighlightConfiguration>>,
     #[cfg(feature = "tree-sitter-tags")]
     tags_config: OnceCell<Option<TagsConfiguration>>,
-    #[cfg(feature = "tree-sitter-highlight")]
+    #[cfg(feature = "tree-sitter-highlight-extended")]
     highlight_names: &'a Mutex<Vec<String>>,
-    #[cfg(feature = "tree-sitter-highlight")]
+    #[cfg(feature = "tree-sitter-highlight-extended")]
     use_all_highlight_names: bool,
     _phantom: PhantomData<&'a ()>,
 }
@@ -665,9 +665,9 @@ pub struct Loader {
     language_configuration_ids_by_file_type: HashMap<String, Vec<usize>>,
     language_configuration_in_current_path: Option<usize>,
     language_configuration_ids_by_first_line_regex: HashMap<String, Vec<usize>>,
-    #[cfg(feature = "tree-sitter-highlight")]
+    #[cfg(feature = "tree-sitter-highlight-extended")]
     highlight_names: Box<Mutex<Vec<String>>>,
-    #[cfg(feature = "tree-sitter-highlight")]
+    #[cfg(feature = "tree-sitter-highlight-extended")]
     use_all_highlight_names: bool,
     debug_build: bool,
     sanitize_build: bool,
@@ -814,9 +814,9 @@ impl Loader {
             language_configuration_ids_by_file_type: HashMap::new(),
             language_configuration_in_current_path: None,
             language_configuration_ids_by_first_line_regex: HashMap::new(),
-            #[cfg(feature = "tree-sitter-highlight")]
+            #[cfg(feature = "tree-sitter-highlight-extended")]
             highlight_names: Box::new(Mutex::new(Vec::new())),
-            #[cfg(feature = "tree-sitter-highlight")]
+            #[cfg(feature = "tree-sitter-highlight-extended")]
             use_all_highlight_names: true,
             debug_build: false,
             sanitize_build: false,
@@ -828,8 +828,8 @@ impl Loader {
         }
     }
 
-    #[cfg(feature = "tree-sitter-highlight")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "tree-sitter-highlight")))]
+    #[cfg(feature = "tree-sitter-highlight-extended")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "tree-sitter-highlight-extended")))]
     pub fn configure_highlights(&mut self, names: &[String]) {
         self.use_all_highlight_names = false;
         let mut highlights = self.highlight_names.lock().unwrap();
@@ -838,8 +838,8 @@ impl Loader {
     }
 
     #[must_use]
-    #[cfg(feature = "tree-sitter-highlight")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "tree-sitter-highlight")))]
+    #[cfg(feature = "tree-sitter-highlight-extended")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "tree-sitter-highlight-extended")))]
     pub fn highlight_names(&self) -> Vec<String> {
         self.highlight_names.lock().unwrap().clone()
     }
@@ -1734,7 +1734,7 @@ impl Loader {
     }
 
     #[must_use]
-    #[cfg(feature = "tree-sitter-highlight")]
+    #[cfg(feature = "tree-sitter-highlight-extended")]
     pub fn highlight_config_for_injection_string<'a>(
         &'a self,
         string: &str,
@@ -1842,13 +1842,13 @@ impl Loader {
                         locals_filenames: grammar.locals.into_vec(),
                         tags_filenames: grammar.tags.into_vec(),
                         highlights_filenames: grammar.highlights.into_vec(),
-                        #[cfg(feature = "tree-sitter-highlight")]
+                        #[cfg(feature = "tree-sitter-highlight-extended")]
                         highlight_config: OnceCell::new(),
                         #[cfg(feature = "tree-sitter-tags")]
                         tags_config: OnceCell::new(),
-                        #[cfg(feature = "tree-sitter-highlight")]
+                        #[cfg(feature = "tree-sitter-highlight-extended")]
                         highlight_names: &self.highlight_names,
-                        #[cfg(feature = "tree-sitter-highlight")]
+                        #[cfg(feature = "tree-sitter-highlight-extended")]
                         use_all_highlight_names: self.use_all_highlight_names,
                         _phantom: PhantomData,
                     };
@@ -1910,13 +1910,13 @@ impl Loader {
                 locals_filenames: None,
                 highlights_filenames: None,
                 tags_filenames: None,
-                #[cfg(feature = "tree-sitter-highlight")]
+                #[cfg(feature = "tree-sitter-highlight-extended")]
                 highlight_config: OnceCell::new(),
                 #[cfg(feature = "tree-sitter-tags")]
                 tags_config: OnceCell::new(),
-                #[cfg(feature = "tree-sitter-highlight")]
+                #[cfg(feature = "tree-sitter-highlight-extended")]
                 highlight_names: &self.highlight_names,
-                #[cfg(feature = "tree-sitter-highlight")]
+                #[cfg(feature = "tree-sitter-highlight-extended")]
                 use_all_highlight_names: self.use_all_highlight_names,
                 _phantom: PhantomData,
             };
@@ -2045,7 +2045,7 @@ impl Loader {
 }
 
 impl LanguageConfiguration<'_> {
-    #[cfg(feature = "tree-sitter-highlight")]
+    #[cfg(feature = "tree-sitter-highlight-extended")]
     pub fn highlight_config(
         &self,
         language: Language,
@@ -2200,7 +2200,7 @@ impl LanguageConfiguration<'_> {
             .map(Option::as_ref)
     }
 
-    #[cfg(any(feature = "tree-sitter-highlight", feature = "tree-sitter-tags"))]
+    #[cfg(any(feature = "tree-sitter-highlight-extended", feature = "tree-sitter-tags"))]
     fn include_path_in_query_error(
         mut error: QueryError,
         ranges: &[(PathBuf, Range<usize>)],
@@ -2226,7 +2226,7 @@ impl LanguageConfiguration<'_> {
         clippy::type_complexity,
         reason = "return type pairs query text with source file ranges"
     )]
-    #[cfg(any(feature = "tree-sitter-highlight", feature = "tree-sitter-tags"))]
+    #[cfg(any(feature = "tree-sitter-highlight-extended", feature = "tree-sitter-tags"))]
     fn read_queries(
         &self,
         paths: Option<&[PathBuf]>,

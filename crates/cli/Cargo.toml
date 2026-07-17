@@ -22,7 +22,7 @@ path = "src/tree_sitter_cli.rs"
 
 [[bin]]
 doc  = false
-name = "tree-sitter"
+name = "tree-sitter-highlight"
 path = "src/main.rs"
 
 [dependencies]
