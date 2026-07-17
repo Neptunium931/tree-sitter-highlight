@@ -509,6 +509,10 @@ pub fn highlight(
     } else if opts.latex {
         println!("latex");
         let mut renderer = LatexRenderer::new();
+        renderer.render(events, &source, &move |_highlight, _output| {})?;
+        if !opts.quiet {
+            println!("{}", renderer.lines().collect::<String>());
+        }
     } else {
         let mut style_stack = vec![theme.default_style().ansi];
         for event in events {

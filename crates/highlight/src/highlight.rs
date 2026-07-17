@@ -1422,13 +1422,13 @@ impl LatexRenderer {
     where
         F: Fn(Highlight, &mut Vec<u8>),
     {
-        self.latex.extend(b"<span ");
+        self.latex.extend(b"\\textcolor[rgb]{");
         (attribute_callback)(h, &mut self.latex);
-        self.latex.extend(b">");
+        self.latex.extend(b"}{");
     }
 
     fn end_highlight(&mut self) {
-        self.latex.extend(b"</span>");
+        self.latex.extend(b"}");
     }
 
     fn add_text<F>(&mut self, src: &[u8], highlights: &[Highlight], attribute_callback: &F)
