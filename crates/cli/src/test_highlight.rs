@@ -2,7 +2,9 @@ use std::{fs, path::Path};
 
 use anyhow::{Result, anyhow};
 use tree_sitter::Point;
-use tree_sitter_highlight::{Highlight, HighlightConfiguration, HighlightEvent, Highlighter};
+use tree_sitter_highlight_extended::{
+    Highlight, HighlightConfiguration, HighlightEvent, Highlighter,
+};
 use tree_sitter_loader::{Config, Loader};
 
 use crate::{

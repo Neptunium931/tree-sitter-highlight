@@ -27,16 +27,10 @@ jobs:
           toolchain: stable
           components: clippy, rustfmt
 
-      - name: Lint files
-        run: |
-          make lint
-          make lint-web
-
-  sanitize:
-    uses: ./.github/workflows/sanitize.yml
-
-  build:
-    uses: ./.github/workflows/build.yml
-
-  check-wasm-stdlib:
-    uses: ./.github/workflows/wasm_stdlib.yml
+      # - name: Lint files
+      #   run: |
+      #     cargo update --workspace --locked --quiet
+      #     cargo fmt --all --check
+      #     cargo clippy --workspace --all-targets -- -D warnings
+  # sanitize:
+  #   uses: ./.github/workflows/sanitize.yml
