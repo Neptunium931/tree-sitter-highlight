@@ -1437,6 +1437,18 @@ impl LatexRenderer {
     {
         pub const fn latex_escape(c: u8) -> Option<&'static [u8]> {
             match c as char {
+                '#' => Some(b"\\#"),
+                '$' => Some(b"\\$"),
+                '%' => Some(b"\\%"),
+                '&' => Some(b"\\&"),
+                '<' => Some(b"\\textless{}"),
+                '>' => Some(b"\\textgreater{}"),
+                '\\' => Some(b"\\textbackslash{}"),
+                '^' => Some(b"\\textasciicircum{}"),
+                '_' => Some(b"\\_"),
+                '{' => Some(b"\\{"),
+                '}' => Some(b"\\}"),
+                '~' => Some(b"\\textasciitilde{}"),
                 _ => None,
             }
         }
