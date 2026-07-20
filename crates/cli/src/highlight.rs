@@ -509,7 +509,23 @@ pub fn highlight(
     } else if opts.latex {
         println!("latex");
         let mut renderer = LatexRenderer::new();
-        renderer.render(events, &source, &move |_highlight, _output| {})?;
+        renderer.render(events, &source, &move |highlight, output| {
+            let style = &theme.styles[highlight.0];
+            let [r, g, b] = &style.latex.as_ref().unwrap().rgb;
+            output.extend(format!("{r},{g},{b}").as_bytes());
+            if style.latex.as_ref().unwrap().underline {
+                println!("underline");
+                // \underline{your text here}
+            }
+            if style.latex.as_ref().unwrap().bold {
+                println!("bold");
+                // \textbf{your text here}
+            }
+            if style.latex.as_ref().unwrap().italic {
+                println!("italic");
+                // \textit{your text here}
+            }
+        })?;
         if !opts.quiet {
             println!("{}", renderer.lines().collect::<String>());
         }
