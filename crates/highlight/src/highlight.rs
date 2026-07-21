@@ -1475,6 +1475,7 @@ impl LatexRenderer {
                 for _ in highlights {
                     self.end_highlight();
                 }
+                self.latex.extend(b"\\\\");
                 self.latex.push(c);
                 self.line_offsets.push(self.latex.len() as u32);
                 for scope in highlights {
