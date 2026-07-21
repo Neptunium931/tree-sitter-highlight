@@ -17,8 +17,9 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer, ser::SerializeMap}
 use serde_json::{Value, json};
 use tree_sitter::ffi::{self, TSInputEncoding};
 use tree_sitter_highlight_extended::{
-    HighlightConfiguration, HighlightEvent, Highlighter, HtmlRenderer,
+    HighlightConfiguration, HighlightEvent, Highlighter, HtmlRenderer, LatexRenderer,
 };
+
 use tree_sitter_loader::Loader;
 
 pub const HTML_HEAD_HEADER: &str = "
@@ -49,10 +50,33 @@ pub const HTML_FOOTER: &str = "
 </body>
 ";
 
+pub const LATEX_HEADER: &str = "
+\\fbox{
+\\begin{minipage}{\\linewidth}
+\\setlength{\\tabcolsep}{0.1em}
+\\setlength{\\parindent}{-0.5em}
+\\begin{tabular}{l|l}
+";
+
+pub const LATEX_FOOTER: &str = "
+\\end{tabular}
+\\end{minipage}
+}
+";
+
 #[derive(Debug, Default)]
 pub struct Style {
     pub ansi: anstyle::Style,
     pub css: Option<String>,
+    pub latex: Option<LatexStyle>,
+}
+
+#[derive(Debug, Default)]
+pub struct LatexStyle {
+    pub underline: bool,
+    pub bold: bool,
+    pub italic: bool,
+    pub rgb: [f32; 3],
 }
 
 #[derive(Debug)]
@@ -211,11 +235,14 @@ fn parse_style(style: &mut Style, json: Value) {
             }
         }
         style.css = Some(style_to_css(style.ansi));
+        style.latex = Some(style_to_latex(style.ansi));
     } else if let Some(color) = parse_color(json) {
         style.ansi = style.ansi.fg_color(Some(color));
         style.css = Some(style_to_css(style.ansi));
+        style.latex = Some(style_to_latex(style.ansi));
     } else {
         style.css = None;
+        style.latex = None;
     }
 
     if let Some(Color::Rgb(RgbColor(red, green, blue))) = style.ansi.get_fg_color()
@@ -266,6 +293,15 @@ fn hex_string_to_rgb(s: &str) -> Option<(u8, u8, u8)> {
     }
 }
 
+fn rgb_to_latex(rgb: (u8, u8, u8)) -> [f32; 3] {
+    let (red, green, blue) = rgb;
+    [
+        red as f32 / 255.0,
+        green as f32 / 255.0,
+        blue as f32 / 255.0,
+    ]
+}
+
 fn style_to_css(style: anstyle::Style) -> String {
     let mut result = String::new();
     let effects = style.get_effects();
@@ -280,6 +316,38 @@ fn style_to_css(style: anstyle::Style) -> String {
     }
     if let Some(color) = style.get_fg_color() {
         write_color(&mut result, color);
+    }
+    result
+}
+
+fn style_to_latex(style: anstyle::Style) -> LatexStyle {
+    let mut result = LatexStyle::default();
+    let effects = style.get_effects();
+    if effects.contains(Effects::UNDERLINE) {
+        result.underline = true;
+    }
+    if effects.contains(Effects::BOLD) {
+        result.bold = true;
+    }
+    if effects.contains(Effects::ITALIC) {
+        result.italic = true;
+    }
+    if let Some(color) = style.get_fg_color() {
+        match color {
+            Color::Ansi(color) => match color {
+                AnsiColor::Black => result.rgb = [0.0, 0.0, 0.0],
+                AnsiColor::Red => result.rgb = [1.0, 0.0, 0.0],
+                AnsiColor::Green => result.rgb = [0.0, 1.0, 0.0],
+                AnsiColor::Yellow => result.rgb = [1.0, 1.0, 0.0],
+                AnsiColor::Blue => result.rgb = [0.0, 0.0, 1.0],
+                AnsiColor::Magenta => result.rgb = [1.0, 0.0, 1.0],
+                AnsiColor::Cyan => result.rgb = [0.0, 1.0, 1.0],
+                AnsiColor::White => result.rgb = [1.0, 1.0, 1.0],
+                _ => unreachable!(),
+            },
+            Color::Ansi256(Ansi256Color(n)) => result.rgb = rgb_to_latex(rgb_from_ansi256(n)),
+            Color::Rgb(RgbColor(r, g, b)) => result.rgb = rgb_to_latex((r, g, b)),
+        }
     }
     result
 }
@@ -316,6 +384,7 @@ pub struct HighlightOptions {
     pub captures_path: Option<PathBuf>,
     pub inline_styles: bool,
     pub html: bool,
+    pub latex: bool,
     pub quiet: bool,
     pub print_time: bool,
     pub cancellation_flag: Arc<AtomicUsize>,
@@ -450,6 +519,39 @@ pub fn highlight(
             }
             writeln!(&mut stdout, "</table>")?;
             writeln!(&mut stdout, "{HTML_FOOTER}")?;
+        }
+    } else if opts.latex {
+        let mut renderer = LatexRenderer::new();
+        renderer.render(events, &source, &move |highlight, output, num_brackets| {
+            let style = &theme.styles[highlight.0];
+            let [r, g, b] = &style.latex.as_ref().unwrap().rgb;
+            output.extend(format!("{r},{g},{b}").as_bytes());
+            output.extend(b"}{");
+            *num_brackets = *num_brackets+1;
+            if style.latex.as_ref().unwrap().underline {
+                output.extend(b"\\underline{");
+                *num_brackets = *num_brackets+1;
+            }
+            if style.latex.as_ref().unwrap().bold {
+                output.extend(b"\\textbf{");
+                *num_brackets = *num_brackets+1;
+            }
+            if style.latex.as_ref().unwrap().italic {
+                output.extend(b"\\textit{");
+                *num_brackets = *num_brackets+1;
+            }
+        })?;
+
+        if !opts.quiet {
+            writeln!(&mut stdout, "{LATEX_HEADER}")?;
+            for (i, line) in renderer.lines().enumerate() {
+                write!(
+                    &mut stdout,
+                    "\\scriptsize {} & {line}",
+                    i + 1,
+                )?;
+            }
+            writeln!(&mut stdout, "{LATEX_FOOTER}")?;
         }
     } else {
         let mut style_stack = vec![theme.default_style().ansi];
