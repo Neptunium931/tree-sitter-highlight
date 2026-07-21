@@ -154,6 +154,7 @@ pub struct LatexRenderer {
     carriage_return_highlight: Option<Highlight>,
     // The offset in `self.html` of the last carriage return.
     last_carriage_return: Option<usize>,
+    new_line: bool,
     num_brackets: u8,
 }
 
@@ -1333,6 +1334,7 @@ impl LatexRenderer {
             line_offsets: Vec::with_capacity(BUFFER_LINES_RESERVE_CAPACITY),
             carriage_return_highlight: None,
             last_carriage_return: None,
+            new_line: true,
             num_brackets: 0,
         };
         result.line_offsets.push(0);
@@ -1457,6 +1459,7 @@ impl LatexRenderer {
             }
         }
 
+        let mut num_spaces = 0;
         for c in LossyUtf8::new(src).flat_map(|p| p.bytes()) {
             // Don't render carriage return characters, but allow lone carriage returns (not
             // followed by line feeds) to be styled via the attribute callback.
@@ -1468,6 +1471,17 @@ impl LatexRenderer {
                 && c != b'\n'
             {
                 self.add_carriage_return(offset, attribute_callback);
+            }
+            if self.new_line && c == b' ' {
+                num_spaces += 1;
+                continue;
+            }
+            if self.new_line && c != b' ' {
+                self.latex.extend(b"\\hspace*{");
+                self.latex.extend((num_spaces/2).to_string().as_bytes());
+                self.latex.extend(b"em}");
+                num_spaces = 0;
+                self.new_line = false;
             }
 
             // At line boundaries, close and re-open all of the open tags.
@@ -1481,6 +1495,7 @@ impl LatexRenderer {
                 for scope in highlights {
                     self.start_highlight(*scope, attribute_callback);
                 }
+                self.new_line = true;
             } else if let Some(escape) = latex_escape(c) {
                 self.latex.extend_from_slice(escape);
             } else {
