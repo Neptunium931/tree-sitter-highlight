@@ -50,19 +50,15 @@ pub const HTML_FOOTER: &str = "
 </body>
 ";
 
-pub const LATEX_HEADER: &str = "
-\\fbox{
+pub const LATEX_HEADER: &str = "\\fbox{
 \\begin{minipage}{\\linewidth}
 \\setlength{\\tabcolsep}{0.1em}
 \\setlength{\\parindent}{-0.5em}
-\\begin{tabular}{l|l}
-";
+\\begin{tabular}{l|l}";
 
-pub const LATEX_FOOTER: &str = "
-\\end{tabular}
+pub const LATEX_FOOTER: &str = "\\end{tabular}
 \\end{minipage}
-}
-";
+}";
 
 #[derive(Debug, Default)]
 pub struct Style {
