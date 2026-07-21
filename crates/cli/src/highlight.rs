@@ -51,11 +51,17 @@ pub const HTML_FOOTER: &str = "
 ";
 
 pub const LATEX_HEADER: &str = "
+\\fbox{
 \\begin{minipage}{\\linewidth}
+\\setlength{\\tabcolsep}{0.1em}
+\\setlength{\\parindent}{-0.5em}
+\\begin{tabular}{l|l}
 ";
 
 pub const LATEX_FOOTER: &str = "
+\\end{tabular}
 \\end{minipage}
+}
 ";
 
 #[derive(Debug, Default)]
@@ -538,7 +544,13 @@ pub fn highlight(
 
         if !opts.quiet {
             writeln!(&mut stdout, "{LATEX_HEADER}")?;
-            writeln!(&mut stdout, "{}", renderer.lines().collect::<String>())?;
+            for (i, line) in renderer.lines().enumerate() {
+                write!(
+                    &mut stdout,
+                    "\\scriptsize {} & {line}",
+                    i + 1,
+                )?;
+            }
             writeln!(&mut stdout, "{LATEX_FOOTER}")?;
         }
     } else {
