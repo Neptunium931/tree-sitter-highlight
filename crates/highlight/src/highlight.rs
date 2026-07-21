@@ -154,6 +154,7 @@ pub struct LatexRenderer {
     carriage_return_highlight: Option<Highlight>,
     // The offset in `self.html` of the last carriage return.
     last_carriage_return: Option<usize>,
+    num_brackets: u8,
 }
 
 #[derive(Debug)]
@@ -1332,6 +1333,7 @@ impl LatexRenderer {
             line_offsets: Vec::with_capacity(BUFFER_LINES_RESERVE_CAPACITY),
             carriage_return_highlight: None,
             last_carriage_return: None,
+            num_brackets: 0,
         };
         result.line_offsets.push(0);
         result
@@ -1354,7 +1356,7 @@ impl LatexRenderer {
         attribute_callback: &F,
     ) -> Result<(), Error>
     where
-        F: Fn(Highlight, &mut Vec<u8>),
+        F: Fn(Highlight, &mut Vec<u8>, &mut u8),
     {
         let mut highlights = Vec::new();
         for event in highlighter {
@@ -1402,7 +1404,7 @@ impl LatexRenderer {
 
     fn add_carriage_return<F>(&mut self, offset: usize, attribute_callback: &F)
     where
-        F: Fn(Highlight, &mut Vec<u8>),
+        F: Fn(Highlight, &mut Vec<u8>, &mut u8),
     {
         if let Some(highlight) = self.carriage_return_highlight {
             // If a CR is the last character in a `HighlightEvent::Source`
@@ -1412,28 +1414,30 @@ impl LatexRenderer {
             // know.
             let rest = self.latex.split_off(offset);
             self.latex.extend(b"<span ");
-            (attribute_callback)(highlight, &mut self.latex);
+            (attribute_callback)(highlight, &mut self.latex, &mut self.num_brackets);
             self.latex.extend(b"></span>");
             self.latex.extend(rest);
+            panic!("TODO fix add_carriage_return latex");
         }
     }
 
     fn start_highlight<F>(&mut self, h: Highlight, attribute_callback: &F)
     where
-        F: Fn(Highlight, &mut Vec<u8>),
+        F: Fn(Highlight, &mut Vec<u8>, &mut u8),
     {
         self.latex.extend(b"\\textcolor[rgb]{");
-        (attribute_callback)(h, &mut self.latex);
-        self.latex.extend(b"}{");
+        (attribute_callback)(h, &mut self.latex, &mut self.num_brackets);
+        // self.latex.extend(b"{");
     }
 
     fn end_highlight(&mut self) {
-        self.latex.extend(b"}");
+        self.latex.extend(std::iter::repeat(b'}').take(self.num_brackets as usize));
+        self.num_brackets = 0;
     }
 
     fn add_text<F>(&mut self, src: &[u8], highlights: &[Highlight], attribute_callback: &F)
     where
-        F: Fn(Highlight, &mut Vec<u8>),
+        F: Fn(Highlight, &mut Vec<u8>, &mut u8),
     {
         pub const fn latex_escape(c: u8) -> Option<&'static [u8]> {
             match c as char {
