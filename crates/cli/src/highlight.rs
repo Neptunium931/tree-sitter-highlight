@@ -50,6 +50,14 @@ pub const HTML_FOOTER: &str = "
 </body>
 ";
 
+pub const LATEX_HEADER: &str = "
+\\begin{minipage}{\\linewidth}
+";
+
+pub const LATEX_FOOTER: &str = "
+\\end{minipage}
+";
+
 #[derive(Debug, Default)]
 pub struct Style {
     pub ansi: anstyle::Style,
@@ -507,7 +515,6 @@ pub fn highlight(
             writeln!(&mut stdout, "{HTML_FOOTER}")?;
         }
     } else if opts.latex {
-        println!("latex");
         let mut renderer = LatexRenderer::new();
         renderer.render(events, &source, &move |highlight, output, num_brackets| {
             let style = &theme.styles[highlight.0];
@@ -528,8 +535,11 @@ pub fn highlight(
                 *num_brackets = *num_brackets+1;
             }
         })?;
+
         if !opts.quiet {
-            println!("{}", renderer.lines().collect::<String>());
+            writeln!(&mut stdout, "{LATEX_HEADER}")?;
+            writeln!(&mut stdout, "{}", renderer.lines().collect::<String>())?;
+            writeln!(&mut stdout, "{LATEX_FOOTER}")?;
         }
     } else {
         let mut style_stack = vec![theme.default_style().ansi];
