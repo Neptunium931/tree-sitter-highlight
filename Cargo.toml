@@ -100,13 +100,13 @@ schemars   = "1.2.1"
 semver     = { features = [ "serde" ], version = "1.0.27" }
 serde      = { features = [ "derive" ], version = "1.0.228" }
 serde_json = { features = [ "preserve_order" ], version = "1.0.149" }
-similar = "2.7.0"
+similar = "3.1.1"
 streaming-iterator = "0.1.9"
 tempfile = "3.25.0"
 thiserror = "2.0.18"
 unindent = "0.2.4"
 walkdir = "2.5.0"
-wasmparser = "0.244.0"
+wasmparser = "0.254.0"
 webbrowser = "1.1.0"
 
 tree-sitter           = { git = "https://github.com/tree-sitter/tree-sitter.git", version = "0.27.0" }
