@@ -156,6 +156,7 @@ pub struct LatexRenderer {
     last_carriage_return: Option<usize>,
     new_line: bool,
     num_brackets: u8,
+    num_spaces: u16,
 }
 
 #[derive(Debug)]
@@ -1336,6 +1337,7 @@ impl LatexRenderer {
             last_carriage_return: None,
             new_line: true,
             num_brackets: 0,
+            num_spaces: 0,
         };
         result.line_offsets.push(0);
         result
@@ -1459,7 +1461,6 @@ impl LatexRenderer {
             }
         }
 
-        let mut num_spaces = 0;
         for c in LossyUtf8::new(src).flat_map(|p| p.bytes()) {
             // Don't render carriage return characters, but allow lone carriage returns (not
             // followed by line feeds) to be styled via the attribute callback.
@@ -1473,14 +1474,14 @@ impl LatexRenderer {
                 self.add_carriage_return(offset, attribute_callback);
             }
             if self.new_line && c == b' ' {
-                num_spaces += 1;
+                self.num_spaces += 1;
                 continue;
             }
             if self.new_line && c != b' ' {
                 self.latex.extend(b"\\hspace*{");
-                self.latex.extend((num_spaces/2).to_string().as_bytes());
+                self.latex.extend((self.num_spaces/2).to_string().as_bytes());
                 self.latex.extend(b"em}");
-                num_spaces = 0;
+                self.num_spaces = 0;
                 self.new_line = false;
             }
 
