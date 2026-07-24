@@ -146,9 +146,9 @@ checksum = "fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04"
 
 [[package]]
 name = "cc"
-version = "1.3.0"
+version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c89588d05638b5b4594a3348a2d6c20277e43a7f5c5202b05cc56888475a47b8"
+checksum = "5add81bb678e6cb321aff7fa0dc7689ad82b112dbc032cea19f91d6b8e3582b9"
 dependencies = [
  "find-msvc-tools",
  "shlex",
@@ -1468,7 +1468,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter"
 version = "0.27.0"
-source = "git+https://github.com/tree-sitter/tree-sitter.git#0a0e77c375ba24ab8f4a49a389f51850a30a14a1"
+source = "git+https://github.com/tree-sitter/tree-sitter.git#65b5b03c94d8573f6b1a1461e6a90a334b6629c0"
 dependencies = [
  "cc",
  "regex",
@@ -1521,7 +1521,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter-config"
 version = "0.27.0"
-source = "git+https://github.com/tree-sitter/tree-sitter.git#0a0e77c375ba24ab8f4a49a389f51850a30a14a1"
+source = "git+https://github.com/tree-sitter/tree-sitter.git#65b5b03c94d8573f6b1a1461e6a90a334b6629c0"
 dependencies = [
  "etcetera",
  "log",
@@ -1533,7 +1533,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter-generate"
 version = "0.27.0"
-source = "git+https://github.com/tree-sitter/tree-sitter.git#0a0e77c375ba24ab8f4a49a389f51850a30a14a1"
+source = "git+https://github.com/tree-sitter/tree-sitter.git#65b5b03c94d8573f6b1a1461e6a90a334b6629c0"
 dependencies = [
  "bitflags",
  "dunce",
@@ -1562,7 +1562,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter-language"
 version = "0.1.8"
-source = "git+https://github.com/tree-sitter/tree-sitter.git#0a0e77c375ba24ab8f4a49a389f51850a30a14a1"
+source = "git+https://github.com/tree-sitter/tree-sitter.git#65b5b03c94d8573f6b1a1461e6a90a334b6629c0"
 
 [[package]]
 name = "tree-sitter-loader"
@@ -1587,7 +1587,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter-tags"
 version = "0.27.0"
-source = "git+https://github.com/tree-sitter/tree-sitter.git#0a0e77c375ba24ab8f4a49a389f51850a30a14a1"
+source = "git+https://github.com/tree-sitter/tree-sitter.git#65b5b03c94d8573f6b1a1461e6a90a334b6629c0"
 dependencies = [
  "memchr",
  "regex",
