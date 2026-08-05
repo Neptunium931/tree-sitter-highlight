@@ -33,6 +33,10 @@ Options:
   -V, --version  Print version
 ```
 
-### $\LaTeX$
+## $\LaTeX$
 
 $\LaTeX$ generation can be used standalone or via the [latex-tree-sitter](https://github.com/Neptunium931/latex-tree-sitter) package.
+
+## Contributing
+
+Pull requests are welcome. Feel free to open an issue if you want to add other features.
