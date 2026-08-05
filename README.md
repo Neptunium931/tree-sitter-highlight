@@ -3,7 +3,7 @@
 `tree-sitter-highlight` is a fork of [tree-sitter](https://github.com/tree-sitter/tree-sitter)
 aimed at enhancing the `tree-sitter` `highlight` module to add
 $\LaTeX$ generation (the `highlight` module is considered obsolete by the
-`tree-sitter` team, which is why a fork was necessary; see <https://github.com/tree-sitter/tree-sitter/pull/5536>).
+`tree-sitter` team, which is why a fork was necessary; see <https://github.com/tree-sitter/tree-sitter/pull/5537>).
 
 ## Install
 
