@@ -1582,7 +1582,7 @@ checksum = "db97caf9d906fbde555dd62fa95ddba9eecfd14cb388e4f491a66d74cd5fb79a"
 [[package]]
 name = "tree-sitter"
 version = "0.27.0"
-source = "git+https://github.com/tree-sitter/tree-sitter.git#129d8cd1413f8a44015a2c5bb1a1eff0e6ea2a3e"
+source = "git+https://github.com/tree-sitter/tree-sitter.git#8933cb7b403485c89ed5e1bba38ec9e73b4d1791"
 dependencies = [
  "cc",
  "regex",
@@ -1635,7 +1635,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter-config"
 version = "0.27.0"
-source = "git+https://github.com/tree-sitter/tree-sitter.git#129d8cd1413f8a44015a2c5bb1a1eff0e6ea2a3e"
+source = "git+https://github.com/tree-sitter/tree-sitter.git#8933cb7b403485c89ed5e1bba38ec9e73b4d1791"
 dependencies = [
  "etcetera",
  "log",
@@ -1647,7 +1647,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter-generate"
 version = "0.27.0"
-source = "git+https://github.com/tree-sitter/tree-sitter.git#129d8cd1413f8a44015a2c5bb1a1eff0e6ea2a3e"
+source = "git+https://github.com/tree-sitter/tree-sitter.git#8933cb7b403485c89ed5e1bba38ec9e73b4d1791"
 dependencies = [
  "bitflags",
  "dunce",
@@ -1677,7 +1677,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter-language"
 version = "0.1.8"
-source = "git+https://github.com/tree-sitter/tree-sitter.git#129d8cd1413f8a44015a2c5bb1a1eff0e6ea2a3e"
+source = "git+https://github.com/tree-sitter/tree-sitter.git#8933cb7b403485c89ed5e1bba38ec9e73b4d1791"
 
 [[package]]
 name = "tree-sitter-loader"
@@ -1702,7 +1702,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter-tags"
 version = "0.27.0"
-source = "git+https://github.com/tree-sitter/tree-sitter.git#129d8cd1413f8a44015a2c5bb1a1eff0e6ea2a3e"
+source = "git+https://github.com/tree-sitter/tree-sitter.git#8933cb7b403485c89ed5e1bba38ec9e73b4d1791"
 dependencies = [
  "memchr",
  "regex",
