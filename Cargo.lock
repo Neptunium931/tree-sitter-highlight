@@ -1582,7 +1582,7 @@ checksum = "db97caf9d906fbde555dd62fa95ddba9eecfd14cb388e4f491a66d74cd5fb79a"
 [[package]]
 name = "tree-sitter"
 version = "0.27.0"
-source = "git+https://github.com/tree-sitter/tree-sitter.git#129d8cd1413f8a44015a2c5bb1a1eff0e6ea2a3e"
+source = "git+https://github.com/tree-sitter/tree-sitter.git#664e9a678667302fee9c705103072119b4fd4845"
 dependencies = [
  "cc",
  "regex",
@@ -1627,7 +1627,7 @@ dependencies = [
  "tree-sitter-tags",
  "unindent",
  "walkdir",
- "wasmparser 0.257.1",
+ "wasmparser 0.258.0",
  "webbrowser",
  "widestring",
 ]
@@ -1635,7 +1635,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter-config"
 version = "0.27.0"
-source = "git+https://github.com/tree-sitter/tree-sitter.git#129d8cd1413f8a44015a2c5bb1a1eff0e6ea2a3e"
+source = "git+https://github.com/tree-sitter/tree-sitter.git#664e9a678667302fee9c705103072119b4fd4845"
 dependencies = [
  "etcetera",
  "log",
@@ -1647,7 +1647,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter-generate"
 version = "0.27.0"
-source = "git+https://github.com/tree-sitter/tree-sitter.git#129d8cd1413f8a44015a2c5bb1a1eff0e6ea2a3e"
+source = "git+https://github.com/tree-sitter/tree-sitter.git#664e9a678667302fee9c705103072119b4fd4845"
 dependencies = [
  "bitflags",
  "dunce",
@@ -1677,7 +1677,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter-language"
 version = "0.1.8"
-source = "git+https://github.com/tree-sitter/tree-sitter.git#129d8cd1413f8a44015a2c5bb1a1eff0e6ea2a3e"
+source = "git+https://github.com/tree-sitter/tree-sitter.git#664e9a678667302fee9c705103072119b4fd4845"
 
 [[package]]
 name = "tree-sitter-loader"
@@ -1702,7 +1702,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter-tags"
 version = "0.27.0"
-source = "git+https://github.com/tree-sitter/tree-sitter.git#129d8cd1413f8a44015a2c5bb1a1eff0e6ea2a3e"
+source = "git+https://github.com/tree-sitter/tree-sitter.git#664e9a678667302fee9c705103072119b4fd4845"
 dependencies = [
  "memchr",
  "regex",
@@ -1839,9 +1839,9 @@ dependencies = [
 
 [[package]]
 name = "wasmparser"
-version = "0.257.1"
+version = "0.258.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d92fc335fb6d48f46bda1d8b26b69e28320c15ac3272208333833d6e217e2b4a"
+checksum = "d9a61719f93a87b16d325921e251800c4833f8fab50fa21c7de73aed50086313"
 dependencies = [
  "bitflags",
  "hashbrown 0.17.1",
