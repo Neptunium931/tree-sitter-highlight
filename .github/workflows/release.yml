@@ -82,7 +82,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Set up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v2
 
       - name: Set up registry token
         id: auth
@@ -116,7 +116,7 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Set up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v2
 
       - name: Build wasm
         if: matrix.directory == 'lib/binding_web'
